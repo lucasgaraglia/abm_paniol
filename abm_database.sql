@@ -35,7 +35,6 @@ CREATE TABLE tipos_herramienta (
 
 CREATE TABLE herramientas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
     observaciones VARCHAR(500),
     imagen VARCHAR(500),
     tipo_id INT,
@@ -76,3 +75,7 @@ CREATE TABLE baja_herramientas (
 --     FOREIGN KEY (herramienta_id) REFERENCES herramientas(id)
 --     FOREIGN KEY (registro_id) REFERENCES registro_abm(id)
 -- );
+
+
+-- herramientas: saco nombre
+-- agg img a las bdd q pasen ellos
