@@ -4,14 +4,67 @@ import MySQLdb.cursors
 
 app = Flask(__name__)
 
-
 # Configuración de la base de datos MySQL
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = ''
-app.config['MYSQL_DATABASE_DB'] = 'panol'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'abm_database'
+app.config['MYSQL_HOST'] = 'localhost'
 
 mysql = MySQL(app)
+
+# get categorias
+@app.route('/categorias', methods=['GET'])
+def get_categorias():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT id, nombre FROM categorias")
+    categorias = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(categorias), 200
+
+# get subcategorias
+@app.route('/subcategorias', methods=['GET'])
+def get_subcategorias():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT id, nombre, categoria_id FROM subcategorias")
+    subcategorias = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(subcategorias), 200
+
+# get consumibles
+@app.route('/consumibles', methods=['GET'])
+def get_consumibles():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT co.id, co.nombre, co.unidad, co.cantidad, co.subcategoria_id, sc.nombre as subcagetoria_nombre, ca.id as categoria_id, ca.nombre as categoria_nombre FROM consumibles co INNER JOIN subcategorias sc ON co.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
+    subcategorias = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(subcategorias), 200
+
+# get tipo herramientas
+
+# get herramientas
+
+# get 1 categoria
+
+@app.route('/categoria', methods=['GET'])
+def get_categoria():
+    id = request.args.get('sub')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT id, nombre FROM categorias")
+    categorias = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(categorias), 200
+
+# get 1 subcategoria
+
+# get 1 consumible
+
+# get 1 tipo herramienta
+
+# get 1 herramienta
 
 # crear categoria
 @app.route('/categoria', methods=['POST'])
@@ -27,64 +80,71 @@ def add_categoria():
     return jsonify({'message': 'Categoría creada exitosamente'}), 201
 
 # crear subcategoria (pasando categoria)
-@app.route('/subcategoria', methods=['POST']) # cat?=id
+@app.route('/subcategoria', methods=['POST'])
 def add_subcategoria():
     data = request.json
     nombre = data['nombre']
-    categoria_id = request.args.get('cat')
+    categoria_id = data['categoria_id']
     
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO subcategorias (nombre, categoria_id) VALUES (%s, %i)", (nombre, categoria_id))
+    cursor.execute(f"INSERT INTO subcategorias (nombre, categoria_id) VALUES (%s, %s)", (nombre, categoria_id))
     mysql.connection.commit()
     cursor.close()
     
     return jsonify({'message': 'Subcategoría agregada exitosamente'}), 201
 
 # crear consumibles (en subcategoria)
-@app.route('/consumible', methods=['POST']) # sub?=id
+@app.route('/consumible', methods=['POST'])
 def add_consumible():
     data = request.json
     nombre = data['nombre']
     unidad = data['unidad']
     cantidad = data['cantidad']
     imagen = data['imagen']
-    subcategoria_id = request.args.get('sub')
+    subcategoria_id = data['subcategoria_id']
     
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO consumibles (nombre, unidad, cantidad, imagen, subcategoria_id) VALUES (%s, %s, %i, %s, %i)", (nombre, unidad, cantidad, imagen, subcategoria_id))
+    cursor.execute("INSERT INTO consumibles (nombre, unidad, cantidad, imagen, subcategoria_id) VALUES (%s, %s, %s, %s, %s)", (nombre, unidad, cantidad, imagen, subcategoria_id))
     mysql.connection.commit()
     cursor.close()
     
     return jsonify({'message': 'Consumible agregado exitosamente'}), 201
 
 # crear tipo_herramienta (en subcategoria)
-@app.route('/tipo-herramienta', methods=['POST']) # sub?=id
+@app.route('/tipo-herramienta', methods=['POST'])
 def add_tipo_herramienta():
     data = request.json
     nombre = data['nombre']
-    #cantidad = data['cantidad']  0
-    #disponibles = data['disponibles']  0
-    subcategoria_id = request.args.get('sub')
+    subcategoria_id = data['subcategoria_id']
     
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO tipos_herramienta (nombre, cantidad, disponibles, subcategoria_id) VALUES (%s, %i, %i, %i)", (nombre, 0, 0, subcategoria_id))
+    cursor.execute("INSERT INTO tipos_herramienta (nombre, cantidad, disponibles, subcategoria_id) VALUES (%s, %s, %s, %s)", (nombre, 0, 0, subcategoria_id))
     mysql.connection.commit()
     cursor.close()
     
     return jsonify({'message': 'Consumible agregado exitosamente'}), 201
 
 # alta de herramienta
-@app.route('/herramienta', methods=['POST']) # tipo?=id
+@app.route('/herramienta', methods=['POST'])
 def add_herramienta():
     data = request.json
     observaciones = data['observaciones']
     imagen = data['imagen']
-    tipo_id = request.args.get('tipo')
+    tipo_id = data['tipo_id']
     
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO herramientas (observaciones, imagen, tipo_id) VALUES (%s, %s, %i)", (observaciones, imagen, tipo_id))
+    cursor.execute("INSERT INTO herramientas (observaciones, imagen, tipo_id) VALUES (%s, %s, %s)", (observaciones, imagen, tipo_id))
+    
+    # consulta para afectar a cantidad de tipo_herramienta
+    cursor.execute("""
+        UPDATE tipos_herramienta
+        SET cantidad = cantidad + 1, disponibles = disponibles + 1
+        WHERE id = %s
+    """, (tipo_id,))
     mysql.connection.commit()
     cursor.close()
+    
+    
     
     return jsonify({'message': 'Alta exitosa de la herramienta'}), 201
 
@@ -162,6 +222,3 @@ if __name__ == '__main__':
 #     cursor.close()
     
 #     return jsonify({'message': 'Herramienta eliminada exitosamente'})
-
-if __name__ == '__main__':
-    app.run(debug=True)
