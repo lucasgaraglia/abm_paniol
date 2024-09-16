@@ -73,7 +73,7 @@ def add_categoria():
     nombre = data['nombre']
     
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO categorias (nombre) VALUES (%s)", (nombre))
+    cursor.execute("INSERT INTO categorias (nombre) VALUES (%s)", (nombre,))
     mysql.connection.commit()
     cursor.close()
     
@@ -122,7 +122,7 @@ def add_tipo_herramienta():
     mysql.connection.commit()
     cursor.close()
     
-    return jsonify({'message': 'Consumible agregado exitosamente'}), 201
+    return jsonify({'message': 'Tipo de herramienta agregado exitosamente'}), 201
 
 # alta de herramienta
 @app.route('/herramienta', methods=['POST'])
@@ -144,15 +144,63 @@ def add_herramienta():
     mysql.connection.commit()
     cursor.close()
     
-    
-    
     return jsonify({'message': 'Alta exitosa de la herramienta'}), 201
 
 # baja de herramienta (paso toda la info a bajas, y elimino el registro de herramientas)
+@app.route('/herramienta', methods=['DELETE'])
+def baja_herramienta():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    # Obtener la herramienta con todos sus campos
+    cursor.execute("SELECT id, imagen, observaciones, tipo_id FROM herramientas WHERE id = %s", (id,))
+    herramienta = cursor.fetchone()
+
+    if not herramienta:
+        cursor.close()
+        return jsonify({'message': 'Herramienta no encontrada'}), 404
+
+    # Insertar los datos de la herramienta en la tabla baja_herramientas
+    cursor.execute("""
+        INSERT INTO baja_herramientas (id, observaciones, imagen, tipo_id)
+        VALUES (%s, %s, %s, %s)
+    """, (herramienta['id'], herramienta['observaciones'], herramienta['imagen'], herramienta['tipo_id']))
+
+    # Eliminar la herramienta de la tabla herramientas
+    cursor.execute("DELETE FROM herramientas WHERE id = %s", (id,))
+    
+    # Actualizar la cantidad y disponibles del tipo de herramienta
+    cursor.execute("""
+        UPDATE tipos_herramienta
+        SET cantidad = cantidad - 1, disponibles = disponibles - 1
+        WHERE id = %s
+    """, (herramienta['tipo_id'],))
+    
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Herramienta dada de baja exitosamente'}), 200
 
 
 
 # modificacion de categoria
+@app.route("/categoria", methods=['PATCH'])
+def modificar_categoria():
+    id = request.args.get('id')
+    data = request.json
+    nombre = data['nombre']
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    cursor.execute("""
+        UPDATE categorias
+        SET nombre = %s
+        WHERE id = %s
+    """, (nombre, id))
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Categoría modificada exitosamente'}), 200
 
 # modificacion de subcategoria
 
