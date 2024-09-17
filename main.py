@@ -184,7 +184,7 @@ def baja_herramienta():
 
 
 # modificacion de categoria
-@app.route("/categoria", methods=['PATCH'])
+@app.route("/categoria", methods=['PUT'])
 def modificar_categoria():
     id = request.args.get('id')
     data = request.json
@@ -202,14 +202,111 @@ def modificar_categoria():
 
     return jsonify({'message': 'Categoría modificada exitosamente'}), 200
 
-# modificacion de subcategoria
+# modificación de subcategoria - nombre y categoria_id
+@app.route("/subcategoria", methods=['PUT'])
+def modificar_subcategoria():
+    id = request.args.get('id')
+    data = request.json
+    nombre = data.get('nombre')
+    categoria_id = data.get('categoria_id')
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    # Actualizar tanto el nombre como el categoria_id si están presentes en el request
+    cursor.execute("""
+        UPDATE subcategorias
+        SET nombre = %s, categoria_id = %s
+        WHERE id = %s
+    """, (nombre, categoria_id, id))
+
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Subcategoría modificada exitosamente'}), 200
+
+
 
 # modificacion de tipo de herramienta
+@app.route("/tipo-herramienta", methods=['PUT'])
+def modificar_tipo_herramienta():
+    id = request.args.get('id')
+    data = request.json
+    nombre = data.get('nombre')
+    cantidad = data.get('cantidad')
+    disponibles = data.get('disponibles')
+    subcategoria_id = data.get('subcategoria_id')
+
+    cursor = mysql.connection.cursor()
+
+    # Verificar si el tipo_herramienta existe
+    cursor.execute("SELECT * FROM tipos_herramienta WHERE id = %s", (id,))
+    tipo_herramienta = cursor.fetchone()
+
+    if not tipo_herramienta:
+        cursor.close()
+        return jsonify({'message': 'Tipo de herramienta no encontrado'}), 404
+
+    # Actualizar los campos modificables
+    cursor.execute("""
+        UPDATE tipos_herramienta 
+        SET nombre = %s, cantidad = %s, disponibles = %s, subcategoria_id = %s
+        WHERE id = %s
+    """, (nombre, cantidad, disponibles, subcategoria_id, id))
+
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Tipo de herramienta actualizado exitosamente'}), 200
+
 
 # modificacion de herramienta en especifico
+@app.route("/herramienta", methods=['PUT'])
+def modificar_herramienta():
+    id = request.args.get('id')
+    data = request.json
+    imagen = data.get('imagen')
+    observaciones = data.get('observaciones')
+    tipo_id = data.get('tipo_id')
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    # Actualizar los campos de la herramienta si están presentes en el request
+    cursor.execute("""
+        UPDATE herramientas
+        SET imagen = %s, observaciones = %s, tipo_id = %s
+        WHERE id = %s
+    """, (imagen, observaciones, tipo_id, id))
+
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Herramienta modificada exitosamente'}), 200
+
 
 # modificacion de consumible
+@app.route("/consumible", methods=['PUT'])
+def modificar_consumible():
+    id = request.args.get('id')
+    data = request.json
+    nombre = data.get('nombre')
+    unidad = data.get('unidad')
+    cantidad = data.get('cantidad')
+    imagen = data.get('imagen')
+    subcategoria_id = data.get('subcategoria_id')
 
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    cursor.execute("""
+        UPDATE consumibles
+        SET nombre = %s, unidad = %s, cantidad = %s, imagen = %s, subcategoria_id = %s
+        WHERE id = %s
+    """, (nombre, unidad, cantidad, imagen, subcategoria_id, id))
+
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Consumible modificado exitosamente'}), 200
 
 # eliminar categoria CASCADE
 
