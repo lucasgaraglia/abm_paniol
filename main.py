@@ -55,7 +55,7 @@ def get_tipos_herramienta():
 
 # get herramientas
 @app.route('/herramientas', methods=['GET'])
-def get_herramienta():
+def get_herramientas():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
     herramientas = cursor.fetchall()
@@ -112,6 +112,17 @@ def get_tipo_herramienta():
     return jsonify(tipo), 200
 
 # get 1 herramienta
+@app.route('/herramienta', methods=['GET'])
+def get_herramienta():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id WHERE h.id = %s", id)
+
+    herramienta = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(herramienta), 200
+
 
 # crear categoria
 @app.route('/categoria', methods=['POST'])
@@ -357,6 +368,17 @@ def modificar_consumible():
 
 # eliminar categoria CASCADE
 
+@app.route("/categoria", methods=["DELETE"])
+def eliminar_categoria():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM categorias WHERE id = %s", id)
+    
+    mysql.connection.commit()
+    cursor.close()
+    
+    return jsonify({'message': 'Categoría eliminada exitosamente'}), 200
+
 # eliminar subcategoria CASCADE
 
 # eliminar tipo_herramienta CASCADE
@@ -367,50 +389,4 @@ def modificar_consumible():
 if __name__ == '__main__':
     app.run(debug=True)
 
-# agregar una nueva herramienta
-# @app.route('/herramientas', methods=['POST'])
-# def add_herramienta():
-#     data = request.json
-#     nombre = data['nombre']
-#     tipo_id = data['tipo_id']
-    
-#     cursor = mysql.connection.cursor()
-#     cursor.execute("INSERT INTO herramientas (nombre, tipo_id) VALUES (%s, %s)", (nombre, tipo_id))
-#     mysql.connection.commit()
-#     cursor.close()
-    
-#     return jsonify({'message': 'Herramienta agregada exitosamente'}), 201
-
-# # obtener todas las herramientas
-# @app.route('/herramientas', methods=['GET'])
-# def get_herramientas():
-#     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-#     cursor.execute("SELECT * FROM herramientas")
-#     herramientas = cursor.fetchall()
-#     cursor.close()
-    
-#     return jsonify(herramientas)
-
-# # actualizar una herramienta
-# @app.route('/herramientas/<int:id>', methods=['PUT'])
-# def update_herramienta(id):
-#     data = request.json
-#     nombre = data['nombre']
-#     tipo_id = data['tipo_id']
-    
-#     cursor = mysql.connection.cursor()
-#     cursor.execute("UPDATE herramientas SET nombre=%s, tipo_id=%s WHERE id=%s", (nombre, tipo_id, id))
-#     mysql.connection.commit()
-#     cursor.close()
-    
-#     return jsonify({'message': 'Herramienta actualizada exitosamente'})
-
-# # eliminar una herramienta
-# @app.route('/herramientas/<int:id>', methods=['DELETE'])
-# def delete_herramienta(id):
-#     cursor = mysql.connection.cursor()
-#     cursor.execute("DELETE FROM herramientas WHERE id=%s", (id,))
-#     mysql.connection.commit()
-#     cursor.close()
-    
-#     return jsonify({'message': 'Herramienta eliminada exitosamente'})
+# PROBAR LA BD CASCADE, LOS ENDPOINTS DELETE
