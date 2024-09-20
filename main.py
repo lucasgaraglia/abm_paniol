@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Configuración de la base de datos MySQL
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'abm_database'
+app.config['MYSQL_DB'] = 'panol'
 app.config['MYSQL_HOST'] = 'localhost'
 
 mysql = MySQL(app)
@@ -42,27 +42,74 @@ def get_consumibles():
     
     return jsonify(subcategorias), 200
 
-# get tipo herramientas
-
-# get herramientas
-
-# get 1 categoria
-
-@app.route('/categoria', methods=['GET'])
-def get_categoria():
-    id = request.args.get('sub')
+# get tipos herramienta
+@app.route('/tipos-herramienta', methods=['GET'])
+def get_tipos_herramienta():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT id, nombre FROM categorias")
-    categorias = cursor.fetchall()
+    cursor.execute("SELECT th.id, th.nombre, th.cantidad, th.disponibles, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM tipos_herramienta th INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
+    tipos = cursor.fetchall()
     cursor.close()
     
-    return jsonify(categorias), 200
+    return jsonify(tipos), 200
+
+
+# get herramientas
+@app.route('/herramientas', methods=['GET'])
+def get_herramienta():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
+    herramientas = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(herramientas), 200
+
+
+# get 1 categoria
+@app.route('/categoria', methods=['GET'])
+def get_categoria():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT id, nombre FROM categorias WHERE categoria_id = %s", id)
+    categoria = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(categoria), 200
 
 # get 1 subcategoria
+@app.route('/subcategoria', methods=['GET'])
+def get_subcategoria():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT sc.id, sc.nombre, sc.categoria_id, c.nombre as categoria_nombre FROM subcategorias sc INNER JOIN categorias c ON sc.categoria_id = c.id WHERE sc.id = %s", id)
+
+    subcategoria = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(subcategoria), 200
 
 # get 1 consumible
+@app.route('/consumible', methods=['GET'])
+def get_consumible():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT co.id, co.nombre, co.unidad, co.cantidad, co.imagen, co.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, c.nombre as categoria_nombre FROM consumibles co INNER JOIN subcategorias sc ON co.subcategoria_id = sc.id INNER JOIN categorias c ON sc.categoria_id = c.id WHERE co.id = %s", id)
+
+    consumible = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(consumible), 200
 
 # get 1 tipo herramienta
+@app.route('/tipo-herramienta', methods=['GET'])
+def get_tipo_herramienta():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT th.id, th.nombre, th.cantidad, th.disponibles, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, c.nombre as categoria_nombre FROM tipos_herramienta th INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias c ON sc.categoria_id = c.id WHERE co.id = %s", id)
+
+    tipo = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(tipo), 200
 
 # get 1 herramienta
 
