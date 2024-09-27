@@ -386,7 +386,90 @@ def eliminar_categoria():
 # eliminar consumible
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
 
 # PROBAR LA BD CASCADE, LOS ENDPOINTS DELETE
+
+
+
+#########################################################################################################
+#pedidos
+
+# Obtener todos los pedidos
+@app.route('/pedidos', methods=['GET'])
+def get_pedidos():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT id, usuario_fk, fecha_pedido, estado, herramienta_id, cantidad_solicitada FROM pedidos")
+    pedidos = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(pedidos), 200
+
+# Crear un nuevo pedido
+@app.route('/pedidos', methods=['POST'])
+def crear_pedido():
+    datos = request.get_json()
+    usuario_fk = datos.get('usuario_fk')
+    fecha_pedido = datos.get('fecha_pedido')
+    estado = datos.get('estado')
+    herramienta_id = datos.get('herramienta_id')
+    cantidad_solicitada = datos.get('cantidad_solicitada')
+
+    cursor = mysql.connection.cursor()
+    cursor.execute("INSERT INTO pedidos (usuario_fk, fecha_pedido, estado, herramienta_id, cantidad_solicitada) VALUES (%s, %s, %s, %s, %s)",
+                   (usuario_fk, fecha_pedido, estado, herramienta_id, cantidad_solicitada))
+    mysql.connection.commit()
+    cursor.close()
+    
+    return jsonify({"mensaje": "Pedido creado exitosamente"}), 201
+
+# get historica
+@app.route("/historica_herramienta", methods=['GET'])
+def modificar_herramienta():
+    id = request.args.get('id')
+    data = request.json
+    pedido = data.get('pedido_id_fk')
+    usuario_fk = data.get('usuario_fk')
+    fecha_entrega = data.get('fecha_entrega')
+    fecha_devolucion = data.get('fecha_devolucion')
+    horario_entrega = data.get('horario_entrega')
+    horario_devolucion = request.args.get('horario_devolucion')
+    cantidad = request.args.get('cantidad')
+    estado_fk = request.args.get('estado_fk')
+    observaciones = data.get('observaciones')
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+# get herramientas
+@app.route("/tipos_herramienta", methods=['GET'])
+def modificar_herramienta():
+    id = request.args.get('id')
+    data = request.json
+    id = data.get('id')
+    nombre = data.get('nombre')
+    cantidad = data.get('cantidad')
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+# Obtener un pedido específico por su cliente
+@app.route('/pedidos/<int:id>', methods=['GET'])
+def get_pedido(usuario_fk):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT id, usuario_fk, fecha_pedido, estado, herramienta_id, cantidad_solicitada FROM pedidos WHERE id = %s", (id,))
+    pedido = cursor.fetchone()
+    cursor.close()
+    
+    if pedido:
+        return jsonify(pedido), 200
+    else:
+        return jsonify({"mensaje": "Pedido no encontrado"}), 404
+
+
+# estado del pedido
+@app.route("/pedidos", methods=['PUT'])
+def modificar_herramienta():
+    id = request.args.get('id')
+    data = request.json
+    estado_fk = data.get('estado_fk')
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
