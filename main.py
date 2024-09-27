@@ -473,3 +473,6 @@ def modificar_herramienta():
     estado_fk = data.get('estado_fk')
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+if __name__ == '__main__':
+    app.run(debug=True)
