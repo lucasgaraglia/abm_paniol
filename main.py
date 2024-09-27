@@ -380,10 +380,41 @@ def eliminar_categoria():
     return jsonify({'message': 'Categoría eliminada exitosamente'}), 200
 
 # eliminar subcategoria CASCADE
+@app.route("/subcategoria", methods=["DELETE"])
+def eliminar_subcategoria():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM subcategorias WHERE id = %s", id)
+    
+    mysql.connection.commit()
+    cursor.close()
+    
+    return jsonify({'message': 'Subcategoría eliminada exitosamente'}), 200
 
 # eliminar tipo_herramienta CASCADE
+@app.route("/tipo-herramienta", methods=["DELETE"])
+def eliminar_tipo():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM subcategorias WHERE id = %s", id)
+    
+    mysql.connection.commit()
+    cursor.close()
+    
+    return jsonify({'message': 'Subcategoría eliminada exitosamente'}), 200
+
 
 # eliminar consumible
+@app.route("/consumible", methods=["DELETE"])
+def eliminar_consumible():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM consumibles WHERE id = %s", id)
+    
+    mysql.connection.commit()
+    cursor.close()
+    
+    return jsonify({'message': 'Consumible eliminado exitosamente'}), 200
 
 
 if __name__ == '__main__':
