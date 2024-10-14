@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
-
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app) 
+
 
 # Configuración de la base de datos MySQL
 app.config['MYSQL_USER'] = 'root'
@@ -63,6 +65,15 @@ def get_herramientas():
     
     return jsonify(herramientas), 200
 
+# get herramientas dadas de baja
+@app.route('/herramientas-bajas', methods=['GET'])
+def get_herramientas_bajas():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM baja_herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
+    herramientas = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(herramientas), 200
 
 # get 1 categoria
 @app.route('/categoria', methods=['GET'])
@@ -123,6 +134,16 @@ def get_herramienta():
     
     return jsonify(herramienta), 200
 
+@app.route('/herramienta-baja', methods=['GET'])
+def get_herramienta_baja():
+    id = request.args.get('id')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM baja_herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id WHERE h.id = %s", id)
+
+    herramienta = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(herramienta), 200
 
 # crear categoria
 @app.route('/categoria', methods=['POST'])
