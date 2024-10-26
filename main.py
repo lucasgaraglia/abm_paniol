@@ -2,6 +2,11 @@ from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 from flask_cors import CORS
+
+from werkzeug.utils import secure_filename
+import os
+import uuid
+
 app = Flask(__name__)
 CORS(app) 
 
@@ -14,6 +19,10 @@ app.config['MYSQL_HOST'] = 'localhost'
 
 mysql = MySQL(app)
 
+@app.errorhandler(404)
+def not_found(error):
+    return "Ruta no encontrada."
+    
 # get categorias
 @app.route('/categorias', methods=['GET'])
 def get_categorias():
@@ -38,7 +47,7 @@ def get_subcategorias():
 @app.route('/consumibles', methods=['GET'])
 def get_consumibles():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT co.id, co.nombre, co.unidad, co.cantidad, co.subcategoria_id, sc.nombre as subcagetoria_nombre, ca.id as categoria_id, ca.nombre as categoria_nombre FROM consumibles co INNER JOIN subcategorias sc ON co.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
+    cursor.execute("SELECT co.id, co.nombre, co.unidad, co.cantidad, co.imagen, co.subcategoria_id, sc.nombre as subcagetoria_nombre, ca.id as categoria_id, ca.nombre as categoria_nombre FROM consumibles co INNER JOIN subcategorias sc ON co.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id")
     subcategorias = cursor.fetchall()
     cursor.close()
     
@@ -134,6 +143,7 @@ def get_herramienta():
     
     return jsonify(herramienta), 200
 
+# GET baja herramientas
 @app.route('/herramienta-baja', methods=['GET'])
 def get_herramienta_baja():
     id = request.args.get('id')
@@ -172,21 +182,35 @@ def add_subcategoria():
     
     return jsonify({'message': 'Subcategoría agregada exitosamente'}), 201
 
+# form-data
 # crear consumibles (en subcategoria)
 @app.route('/consumible', methods=['POST'])
 def add_consumible():
-    data = request.json
-    nombre = data['nombre']
-    unidad = data['unidad']
-    cantidad = data['cantidad']
-    imagen = data['imagen']
-    subcategoria_id = data['subcategoria_id']
-    
+    nombre = request.form.get('nombre')
+    unidad = request.form.get('unidad')
+    cantidad = request.form.get('cantidad')
+    subcategoria_id = request.form.get('subcategoria_id')
+
+    if not nombre or not unidad or not cantidad or not subcategoria_id:
+        return jsonify({'error': 'Faltan datos requeridos'}), 400
+
+    imagen_path = None
+    if 'imagen' in request.files:
+        imagen = request.files['imagen']
+        if imagen.filename != '':
+            basepath = os.path.dirname(__file__)
+            filename = secure_filename(imagen.filename)
+            extension = os.path.splitext(filename)[1]
+            new_filename = "consumible_" + filename
+            upload_path = os.path.join(basepath, 'uploads', new_filename)
+            imagen.save(upload_path)
+            imagen_path = "uploads/" + new_filename
+
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO consumibles (nombre, unidad, cantidad, imagen, subcategoria_id) VALUES (%s, %s, %s, %s, %s)", (nombre, unidad, cantidad, imagen, subcategoria_id))
+    cursor.execute("INSERT INTO consumibles (nombre, unidad, cantidad, imagen, subcategoria_id) VALUES (%s, %s, %s, %s, %s)", (nombre, unidad, cantidad, imagen_path, subcategoria_id))
     mysql.connection.commit()
     cursor.close()
-    
+
     return jsonify({'message': 'Consumible agregado exitosamente'}), 201
 
 # crear tipo_herramienta (en subcategoria)
@@ -203,17 +227,31 @@ def add_tipo_herramienta():
     
     return jsonify({'message': 'Tipo de herramienta agregado exitosamente'}), 201
 
+# VIA FORM-DATA
 # alta de herramienta
 @app.route('/herramienta', methods=['POST'])
 def add_herramienta():
-    data = request.json
-    observaciones = data['observaciones']
-    imagen = data['imagen']
-    tipo_id = data['tipo_id']
-    
+    observaciones = request.form.get('observaciones')
+    tipo_id = request.form.get('tipo_id')
+
+    if not observaciones or not tipo_id:
+        return jsonify({'error': 'Faltan datos requeridos'}), 400
+
+    imagen_path = None
+    if 'imagen' in request.files:
+        imagen = request.files['imagen']
+        if imagen.filename != '':
+            basepath = os.path.dirname(__file__)
+            filename = secure_filename(imagen.filename)
+            extension = os.path.splitext(filename)[1]
+            new_filename = "asdasdasd" + extension
+            upload_path = os.path.join(basepath, 'uploads', new_filename)
+            imagen.save(upload_path)
+            imagen_path = "uploads/" + new_filename
+
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO herramientas (observaciones, imagen, tipo_id) VALUES (%s, %s, %s)", (observaciones, imagen, tipo_id))
-    
+    cursor.execute("INSERT INTO herramientas (observaciones, imagen, tipo_id) VALUES (%s, %s, %s)", (observaciones, imagen_path, tipo_id))
+
     # consulta para afectar a cantidad de tipo_herramienta
     cursor.execute("""
         UPDATE tipos_herramienta
@@ -222,8 +260,10 @@ def add_herramienta():
     """, (tipo_id,))
     mysql.connection.commit()
     cursor.close()
-    
+
     return jsonify({'message': 'Alta exitosa de la herramienta'}), 201
+
+
 
 # baja de herramienta (paso toda la info a bajas, y elimino el registro de herramientas)
 @app.route('/herramienta', methods=['DELETE'])
@@ -337,24 +377,51 @@ def modificar_tipo_herramienta():
 
     return jsonify({'message': 'Tipo de herramienta actualizado exitosamente'}), 200
 
-
-# modificacion de herramienta en especifico
+# form-data
+# Modificación de herramienta en específico
 @app.route("/herramienta", methods=['PUT'])
 def modificar_herramienta():
     id = request.args.get('id')
-    data = request.json
-    imagen = data.get('imagen')
-    observaciones = data.get('observaciones')
-    tipo_id = data.get('tipo_id')
+    if not id:
+        return jsonify({'error': 'Falta el parámetro id'}), 400
+
+    observaciones = request.form.get('observaciones')
+    tipo_id = request.form.get('tipo_id')
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-    # Actualizar los campos de la herramienta si están presentes en el request
-    cursor.execute("""
-        UPDATE herramientas
-        SET imagen = %s, observaciones = %s, tipo_id = %s
-        WHERE id = %s
-    """, (imagen, observaciones, tipo_id, id))
+    # Verificar si se subió una nueva imagen
+    if 'imagen' in request.files:
+        imagen = request.files['imagen']
+        if imagen.filename != '':
+            basepath = os.path.dirname(__file__)
+            filename = secure_filename(imagen.filename)
+            extension = os.path.splitext(filename)[1]
+            new_filename = "asdasdasd" + extension
+            upload_path = os.path.join(basepath, 'uploads', new_filename)
+            imagen.save(upload_path)
+            imagen_path = upload_path
+
+            # Actualizar los campos de la herramienta incluyendo la imagen
+            cursor.execute("""
+                UPDATE herramientas
+                SET imagen = %s, observaciones = %s, tipo_id = %s
+                WHERE id = %s
+            """, (imagen_path, observaciones, tipo_id, id))
+        else:
+            # Actualizar los campos de la herramienta sin la imagen
+            cursor.execute("""
+                UPDATE herramientas
+                SET observaciones = %s, tipo_id = %s
+                WHERE id = %s
+            """, (observaciones, tipo_id, id))
+    else:
+        # Actualizar los campos de la herramienta sin la imagen
+        cursor.execute("""
+            UPDATE herramientas
+            SET observaciones = %s, tipo_id = %s
+            WHERE id = %s
+        """, (observaciones, tipo_id, id))
 
     mysql.connection.commit()
     cursor.close()
@@ -363,24 +430,44 @@ def modificar_herramienta():
 
 
 # modificacion de consumible
+
 @app.route("/consumible", methods=['PUT'])
 def modificar_consumible():
     id = request.args.get('id')
-    data = request.json
-    nombre = data.get('nombre')
-    unidad = data.get('unidad')
-    cantidad = data.get('cantidad')
-    imagen = data.get('imagen')
-    subcategoria_id = data.get('subcategoria_id')
+    nombre = request.form.get('nombre')
+    unidad = request.form.get('unidad')
+    cantidad = request.form.get('cantidad')
+    subcategoria_id = request.form.get('subcategoria_id')
 
+    if not id or not nombre or not unidad or not cantidad or not subcategoria_id:
+        return jsonify({'error': 'Faltan datos requeridos'}), 400
+
+    imagen_path = None
+    if 'imagen' in request.files:
+        imagen = request.files['imagen']
+        if imagen.filename != '':
+            basepath = os.path.dirname(__file__)
+            filename = secure_filename(imagen.filename)
+            extension = os.path.splitext(filename)[1]
+            new_filename = "consumible_" + filename
+            upload_path = os.path.join(basepath, 'uploads', new_filename)
+            imagen.save(upload_path)
+            imagen_path = "uploads/" + new_filename
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-    cursor.execute("""
-        UPDATE consumibles
-        SET nombre = %s, unidad = %s, cantidad = %s, imagen = %s, subcategoria_id = %s
-        WHERE id = %s
-    """, (nombre, unidad, cantidad, imagen, subcategoria_id, id))
+    if imagen_path:
+        cursor.execute("""
+            UPDATE consumibles
+            SET nombre = %s, unidad = %s, cantidad = %s, imagen = %s, subcategoria_id = %s
+            WHERE id = %s
+        """, (nombre, unidad, cantidad, imagen_path, subcategoria_id, id))
+    else:
+        cursor.execute("""
+            UPDATE consumibles
+            SET nombre = %s, unidad = %s, cantidad = %s, subcategoria_id = %s
+            WHERE id = %s
+        """, (nombre, unidad, cantidad, subcategoria_id, id))
 
     mysql.connection.commit()
     cursor.close()
@@ -439,6 +526,6 @@ def eliminar_consumible():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 # PROBAR LA BD CASCADE, LOS ENDPOINTS DELETE
