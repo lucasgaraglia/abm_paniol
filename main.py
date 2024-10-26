@@ -13,7 +13,7 @@ CORS(app)
 
 # Configuración de la base de datos MySQL
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'panol-abm'
 app.config['MYSQL_DB'] = 'panol'
 app.config['MYSQL_HOST'] = 'localhost'
 
