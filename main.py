@@ -219,7 +219,7 @@ def add_consumible():
                 new_filename = f"consumible_{uuid.uuid4()}{extension}"
                 upload_path = os.path.join(basepath, 'uploads', new_filename)
                 imagen.save(upload_path)
-                imagen_path = "uploads/" + new_filename
+                imagen_path = new_filename
             else:
                 return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
@@ -264,7 +264,7 @@ def add_herramienta():
                 new_filename = f"herramienta_{uuid.uuid4()}{extension}"
                 upload_path = os.path.join(basepath, 'uploads', new_filename)
                 imagen.save(upload_path)
-                imagen_path = "uploads/" + new_filename
+                imagen_path = new_filename
             else:
                 return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
@@ -420,7 +420,7 @@ def modificar_herramienta():
                 new_filename = f"herramienta_{uuid.uuid4()}{extension}"
                 upload_path = os.path.join(basepath, 'uploads', new_filename)
                 imagen.save(upload_path)
-                imagen_path = "uploads/" + new_filename
+                imagen_path = new_filename
 
                 # Actualizar los campos de la herramienta incluyendo la imagen
                 cursor.execute("""
@@ -474,7 +474,7 @@ def modificar_consumible():
                 new_filename = f"consumible_{uuid.uuid4()}{extension}"
                 upload_path = os.path.join(basepath, 'uploads', new_filename)
                 imagen.save(upload_path)
-                imagen_path = "uploads/" + new_filename
+                imagen_path = new_filename
             else:
                 return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
