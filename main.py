@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 from flask_cors import CORS
@@ -13,7 +13,7 @@ CORS(app)
 
 # Configuración de la base de datos MySQL
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'panol-abm'
+app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'panol'
 app.config['MYSQL_HOST'] = 'localhost'
 
@@ -22,7 +22,22 @@ mysql = MySQL(app)
 @app.errorhandler(404)
 def not_found(error):
     return "Ruta no encontrada."
-    
+
+# Lista de extensiones permitidas
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff'}
+
+def allowed_file(filename):
+    return '.' in filename and os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS
+
+# directorio de uploads
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# servir imagenes
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 # get categorias
 @app.route('/categorias', methods=['GET'])
 def get_categorias():
@@ -183,7 +198,7 @@ def add_subcategoria():
     return jsonify({'message': 'Subcategoría agregada exitosamente'}), 201
 
 # form-data
-# crear consumibles (en subcategoria)
+# crear consumible
 @app.route('/consumible', methods=['POST'])
 def add_consumible():
     nombre = request.form.get('nombre')
@@ -198,13 +213,15 @@ def add_consumible():
     if 'imagen' in request.files:
         imagen = request.files['imagen']
         if imagen.filename != '':
-            basepath = os.path.dirname(__file__)
-            filename = secure_filename(imagen.filename)
-            extension = os.path.splitext(filename)[1]
-            new_filename = "consumible_" + filename
-            upload_path = os.path.join(basepath, 'uploads', new_filename)
-            imagen.save(upload_path)
-            imagen_path = "uploads/" + new_filename
+            if allowed_file(imagen.filename):
+                basepath = os.path.dirname(__file__)
+                extension = os.path.splitext(secure_filename(imagen.filename))[1]
+                new_filename = f"consumible_{uuid.uuid4()}{extension}"
+                upload_path = os.path.join(basepath, 'uploads', new_filename)
+                imagen.save(upload_path)
+                imagen_path = "uploads/" + new_filename
+            else:
+                return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
     cursor = mysql.connection.cursor()
     cursor.execute("INSERT INTO consumibles (nombre, unidad, cantidad, imagen, subcategoria_id) VALUES (%s, %s, %s, %s, %s)", (nombre, unidad, cantidad, imagen_path, subcategoria_id))
@@ -241,18 +258,20 @@ def add_herramienta():
     if 'imagen' in request.files:
         imagen = request.files['imagen']
         if imagen.filename != '':
-            basepath = os.path.dirname(__file__)
-            filename = secure_filename(imagen.filename)
-            extension = os.path.splitext(filename)[1]
-            new_filename = "asdasdasd" + extension
-            upload_path = os.path.join(basepath, 'uploads', new_filename)
-            imagen.save(upload_path)
-            imagen_path = "uploads/" + new_filename
+            if allowed_file(imagen.filename):
+                basepath = os.path.dirname(__file__)
+                extension = os.path.splitext(secure_filename(imagen.filename))[1]
+                new_filename = f"herramienta_{uuid.uuid4()}{extension}"
+                upload_path = os.path.join(basepath, 'uploads', new_filename)
+                imagen.save(upload_path)
+                imagen_path = "uploads/" + new_filename
+            else:
+                return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
     cursor = mysql.connection.cursor()
     cursor.execute("INSERT INTO herramientas (observaciones, imagen, tipo_id) VALUES (%s, %s, %s)", (observaciones, imagen_path, tipo_id))
 
-    # consulta para afectar a cantidad de tipo_herramienta
+    # Consulta para afectar a cantidad de tipo_herramienta
     cursor.execute("""
         UPDATE tipos_herramienta
         SET cantidad = cantidad + 1, disponibles = disponibles + 1
@@ -262,6 +281,7 @@ def add_herramienta():
     cursor.close()
 
     return jsonify({'message': 'Alta exitosa de la herramienta'}), 201
+
 
 
 
@@ -394,20 +414,22 @@ def modificar_herramienta():
     if 'imagen' in request.files:
         imagen = request.files['imagen']
         if imagen.filename != '':
-            basepath = os.path.dirname(__file__)
-            filename = secure_filename(imagen.filename)
-            extension = os.path.splitext(filename)[1]
-            new_filename = "asdasdasd" + extension
-            upload_path = os.path.join(basepath, 'uploads', new_filename)
-            imagen.save(upload_path)
-            imagen_path = upload_path
+            if allowed_file(imagen.filename):
+                basepath = os.path.dirname(__file__)
+                extension = os.path.splitext(secure_filename(imagen.filename))[1]
+                new_filename = f"herramienta_{uuid.uuid4()}{extension}"
+                upload_path = os.path.join(basepath, 'uploads', new_filename)
+                imagen.save(upload_path)
+                imagen_path = "uploads/" + new_filename
 
-            # Actualizar los campos de la herramienta incluyendo la imagen
-            cursor.execute("""
-                UPDATE herramientas
-                SET imagen = %s, observaciones = %s, tipo_id = %s
-                WHERE id = %s
-            """, (imagen_path, observaciones, tipo_id, id))
+                # Actualizar los campos de la herramienta incluyendo la imagen
+                cursor.execute("""
+                    UPDATE herramientas
+                    SET imagen = %s, observaciones = %s, tipo_id = %s
+                    WHERE id = %s
+                """, (imagen_path, observaciones, tipo_id, id))
+            else:
+                return jsonify({'error': 'Tipo de archivo no permitido'}), 400
         else:
             # Actualizar los campos de la herramienta sin la imagen
             cursor.execute("""
@@ -429,8 +451,8 @@ def modificar_herramienta():
     return jsonify({'message': 'Herramienta modificada exitosamente'}), 200
 
 
+# VIA FORM-DATA
 # modificacion de consumible
-
 @app.route("/consumible", methods=['PUT'])
 def modificar_consumible():
     id = request.args.get('id')
@@ -446,13 +468,15 @@ def modificar_consumible():
     if 'imagen' in request.files:
         imagen = request.files['imagen']
         if imagen.filename != '':
-            basepath = os.path.dirname(__file__)
-            filename = secure_filename(imagen.filename)
-            extension = os.path.splitext(filename)[1]
-            new_filename = "consumible_" + filename
-            upload_path = os.path.join(basepath, 'uploads', new_filename)
-            imagen.save(upload_path)
-            imagen_path = "uploads/" + new_filename
+            if allowed_file(imagen.filename):
+                basepath = os.path.dirname(__file__)
+                extension = os.path.splitext(secure_filename(imagen.filename))[1]
+                new_filename = f"consumible_{uuid.uuid4()}{extension}"
+                upload_path = os.path.join(basepath, 'uploads', new_filename)
+                imagen.save(upload_path)
+                imagen_path = "uploads/" + new_filename
+            else:
+                return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 

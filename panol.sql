@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Sep 28, 2024 at 01:19 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 25-10-2024 a las 23:00:41
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `panol`
+-- Base de datos: `panol`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `baja_herramientas`
+-- Estructura de tabla para la tabla `baja_herramientas`
 --
 
 CREATE TABLE `baja_herramientas` (
@@ -35,10 +35,19 @@ CREATE TABLE `baja_herramientas` (
   `tipo_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `baja_herramientas`
+--
+
+INSERT INTO `baja_herramientas` (`id`, `nombre`, `imagen`, `observaciones`, `tipo_id`) VALUES
+(1, '', 'ejejeje', 'HOOLLAAA', 2),
+(4, '', 'dsfsdfsd', NULL, 2),
+(5, '', 'img.jpg', 'Tiene un notable desgaste en el anverso', 4);
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categorias`
+-- Estructura de tabla para la tabla `categorias`
 --
 
 CREATE TABLE `categorias` (
@@ -47,38 +56,40 @@ CREATE TABLE `categorias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `categorias`
+-- Volcado de datos para la tabla `categorias`
 --
 
 INSERT INTO `categorias` (`id`, `nombre`) VALUES
-(1, 'Manual');
+(1, 'Manual'),
+(3, 'Medición');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `consumibles`
+-- Estructura de tabla para la tabla `consumibles`
 --
 
 CREATE TABLE `consumibles` (
   `id` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
-  `unidad` int(11) NOT NULL,
+  `unidad` varchar(40) NOT NULL,
   `cantidad` int(11) NOT NULL,
   `imagen` varchar(255) DEFAULT NULL,
   `subcategoria_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `consumibles`
+-- Volcado de datos para la tabla `consumibles`
 --
 
 INSERT INTO `consumibles` (`id`, `nombre`, `unidad`, `cantidad`, `imagen`, `subcategoria_id`) VALUES
-(1, 'Clavos de cabeza plana de 20mm', 0, 80, 'imagen1.png', 1);
+(2, 'clavo 5mm', 'g', 400, '', 1),
+(3, '5mm', 'g', 10, '', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `devoluciones`
+-- Estructura de tabla para la tabla `devoluciones`
 --
 
 CREATE TABLE `devoluciones` (
@@ -95,7 +106,7 @@ CREATE TABLE `devoluciones` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `estado`
+-- Estructura de tabla para la tabla `estado`
 --
 
 CREATE TABLE `estado` (
@@ -106,7 +117,7 @@ CREATE TABLE `estado` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `herramientas`
+-- Estructura de tabla para la tabla `herramientas`
 --
 
 CREATE TABLE `herramientas` (
@@ -117,16 +128,20 @@ CREATE TABLE `herramientas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `herramientas`
+-- Volcado de datos para la tabla `herramientas`
 --
 
 INSERT INTO `herramientas` (`id`, `imagen`, `observaciones`, `tipo_id`) VALUES
-(1, 'imagen2.png', 'asd', 2);
+(6, '', 'Tiene un notable desgaste en el anverso', 4),
+(7, '', 'dasda', 2),
+(8, '', 'dasda', 2),
+(9, '', 'dasda', 2),
+(10, '', 'dasda', 2);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `historica`
+-- Estructura de tabla para la tabla `historica`
 --
 
 CREATE TABLE `historica` (
@@ -141,7 +156,7 @@ CREATE TABLE `historica` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `historica_consumibles`
+-- Estructura de tabla para la tabla `historica_consumibles`
 --
 
 CREATE TABLE `historica_consumibles` (
@@ -159,7 +174,7 @@ CREATE TABLE `historica_consumibles` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `historica_herramientas`
+-- Estructura de tabla para la tabla `historica_herramientas`
 --
 
 CREATE TABLE `historica_herramientas` (
@@ -179,7 +194,7 @@ CREATE TABLE `historica_herramientas` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `pedidos`
+-- Estructura de tabla para la tabla `pedidos`
 --
 
 CREATE TABLE `pedidos` (
@@ -194,7 +209,7 @@ CREATE TABLE `pedidos` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `pedido_consumibles`
+-- Estructura de tabla para la tabla `pedido_consumibles`
 --
 
 CREATE TABLE `pedido_consumibles` (
@@ -207,7 +222,7 @@ CREATE TABLE `pedido_consumibles` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `pedido_herramientas`
+-- Estructura de tabla para la tabla `pedido_herramientas`
 --
 
 CREATE TABLE `pedido_herramientas` (
@@ -220,7 +235,7 @@ CREATE TABLE `pedido_herramientas` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `subcategorias`
+-- Estructura de tabla para la tabla `subcategorias`
 --
 
 CREATE TABLE `subcategorias` (
@@ -230,16 +245,19 @@ CREATE TABLE `subcategorias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `subcategorias`
+-- Volcado de datos para la tabla `subcategorias`
 --
 
 INSERT INTO `subcategorias` (`id`, `nombre`, `categoria_id`) VALUES
-(1, 'Clavos', 1);
+(1, 'Clavos', 1),
+(2, 'HOAA', 1),
+(4, 'Regla', 3),
+(5, 'Cinta metrica', 3);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tipos_herramienta`
+-- Estructura de tabla para la tabla `tipos_herramienta`
 --
 
 CREATE TABLE `tipos_herramienta` (
@@ -251,16 +269,18 @@ CREATE TABLE `tipos_herramienta` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tipos_herramienta`
+-- Volcado de datos para la tabla `tipos_herramienta`
 --
 
 INSERT INTO `tipos_herramienta` (`id`, `nombre`, `cantidad`, `disponibles`, `subcategoria_id`) VALUES
-(2, 'Destornillador plano', 1, 1, 1);
+(2, 'Destornillador plano', 3, 3, 1),
+(4, 'Regla metalica de 40 cm', 0, 0, 4),
+(5, 'Regla 20 cm', 0, 0, 4);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `usuarios`
+-- Estructura de tabla para la tabla `usuarios`
 --
 
 CREATE TABLE `usuarios` (
@@ -271,31 +291,31 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Indexes for dumped tables
+-- Índices para tablas volcadas
 --
 
 --
--- Indexes for table `baja_herramientas`
+-- Indices de la tabla `baja_herramientas`
 --
 ALTER TABLE `baja_herramientas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `tipo_id` (`tipo_id`);
 
 --
--- Indexes for table `categorias`
+-- Indices de la tabla `categorias`
 --
 ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `consumibles`
+-- Indices de la tabla `consumibles`
 --
 ALTER TABLE `consumibles`
   ADD PRIMARY KEY (`id`),
   ADD KEY `subcategoria_id` (`subcategoria_id`);
 
 --
--- Indexes for table `devoluciones`
+-- Indices de la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
   ADD PRIMARY KEY (`id`),
@@ -305,20 +325,20 @@ ALTER TABLE `devoluciones`
   ADD KEY `estado_fk` (`estado_fk`);
 
 --
--- Indexes for table `estado`
+-- Indices de la tabla `estado`
 --
 ALTER TABLE `estado`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `herramientas`
+-- Indices de la tabla `herramientas`
 --
 ALTER TABLE `herramientas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `tipo_id` (`tipo_id`);
 
 --
--- Indexes for table `historica`
+-- Indices de la tabla `historica`
 --
 ALTER TABLE `historica`
   ADD PRIMARY KEY (`id`),
@@ -327,7 +347,7 @@ ALTER TABLE `historica`
   ADD KEY `estado_fk` (`estado_fk`);
 
 --
--- Indexes for table `historica_consumibles`
+-- Indices de la tabla `historica_consumibles`
 --
 ALTER TABLE `historica_consumibles`
   ADD PRIMARY KEY (`id`),
@@ -337,7 +357,7 @@ ALTER TABLE `historica_consumibles`
   ADD KEY `estado_fk` (`estado_fk`);
 
 --
--- Indexes for table `historica_herramientas`
+-- Indices de la tabla `historica_herramientas`
 --
 ALTER TABLE `historica_herramientas`
   ADD PRIMARY KEY (`id`),
@@ -347,7 +367,7 @@ ALTER TABLE `historica_herramientas`
   ADD KEY `estado_fk` (`estado_fk`);
 
 --
--- Indexes for table `pedidos`
+-- Indices de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
   ADD PRIMARY KEY (`id`),
@@ -355,7 +375,7 @@ ALTER TABLE `pedidos`
   ADD KEY `estado_fk` (`estado_fk`);
 
 --
--- Indexes for table `pedido_consumibles`
+-- Indices de la tabla `pedido_consumibles`
 --
 ALTER TABLE `pedido_consumibles`
   ADD PRIMARY KEY (`id`),
@@ -363,7 +383,7 @@ ALTER TABLE `pedido_consumibles`
   ADD KEY `consumible_id_fk` (`consumible_id_fk`);
 
 --
--- Indexes for table `pedido_herramientas`
+-- Indices de la tabla `pedido_herramientas`
 --
 ALTER TABLE `pedido_herramientas`
   ADD PRIMARY KEY (`id`),
@@ -371,132 +391,132 @@ ALTER TABLE `pedido_herramientas`
   ADD KEY `herramienta_id_fk` (`herramienta_id_fk`);
 
 --
--- Indexes for table `subcategorias`
+-- Indices de la tabla `subcategorias`
 --
 ALTER TABLE `subcategorias`
   ADD PRIMARY KEY (`id`),
   ADD KEY `categoria_id` (`categoria_id`);
 
 --
--- Indexes for table `tipos_herramienta`
+-- Indices de la tabla `tipos_herramienta`
 --
 ALTER TABLE `tipos_herramienta`
   ADD PRIMARY KEY (`id`),
   ADD KEY `subcategoria_id` (`subcategoria_id`);
 
 --
--- Indexes for table `usuarios`
+-- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT for table `categorias`
+-- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `consumibles`
+-- AUTO_INCREMENT de la tabla `consumibles`
 --
 ALTER TABLE `consumibles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `devoluciones`
+-- AUTO_INCREMENT de la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `estado`
+-- AUTO_INCREMENT de la tabla `estado`
 --
 ALTER TABLE `estado`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `herramientas`
+-- AUTO_INCREMENT de la tabla `herramientas`
 --
 ALTER TABLE `herramientas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `historica`
+-- AUTO_INCREMENT de la tabla `historica`
 --
 ALTER TABLE `historica`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `historica_consumibles`
+-- AUTO_INCREMENT de la tabla `historica_consumibles`
 --
 ALTER TABLE `historica_consumibles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `historica_herramientas`
+-- AUTO_INCREMENT de la tabla `historica_herramientas`
 --
 ALTER TABLE `historica_herramientas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `pedidos`
+-- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `pedido_consumibles`
+-- AUTO_INCREMENT de la tabla `pedido_consumibles`
 --
 ALTER TABLE `pedido_consumibles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `pedido_herramientas`
+-- AUTO_INCREMENT de la tabla `pedido_herramientas`
 --
 ALTER TABLE `pedido_herramientas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `subcategorias`
+-- AUTO_INCREMENT de la tabla `subcategorias`
 --
 ALTER TABLE `subcategorias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `tipos_herramienta`
+-- AUTO_INCREMENT de la tabla `tipos_herramienta`
 --
 ALTER TABLE `tipos_herramienta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `usuarios`
+-- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- Constraints for dumped tables
+-- Restricciones para tablas volcadas
 --
 
 --
--- Constraints for table `baja_herramientas`
+-- Filtros para la tabla `baja_herramientas`
 --
 ALTER TABLE `baja_herramientas`
   ADD CONSTRAINT `baja_herramientas_ibfk_1` FOREIGN KEY (`tipo_id`) REFERENCES `tipos_herramienta` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `consumibles`
+-- Filtros para la tabla `consumibles`
 --
 ALTER TABLE `consumibles`
   ADD CONSTRAINT `consumibles_ibfk_1` FOREIGN KEY (`subcategoria_id`) REFERENCES `subcategorias` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `devoluciones`
+-- Filtros para la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
   ADD CONSTRAINT `devoluciones_ibfk_1` FOREIGN KEY (`pedido_id_fk`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
@@ -505,13 +525,13 @@ ALTER TABLE `devoluciones`
   ADD CONSTRAINT `devoluciones_ibfk_4` FOREIGN KEY (`estado_fk`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `herramientas`
+-- Filtros para la tabla `herramientas`
 --
 ALTER TABLE `herramientas`
   ADD CONSTRAINT `herramientas_ibfk_1` FOREIGN KEY (`tipo_id`) REFERENCES `tipos_herramienta` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `historica`
+-- Filtros para la tabla `historica`
 --
 ALTER TABLE `historica`
   ADD CONSTRAINT `historica_ibfk_1` FOREIGN KEY (`pedido_id_fk`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
@@ -519,7 +539,7 @@ ALTER TABLE `historica`
   ADD CONSTRAINT `historica_ibfk_3` FOREIGN KEY (`estado_fk`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `historica_consumibles`
+-- Filtros para la tabla `historica_consumibles`
 --
 ALTER TABLE `historica_consumibles`
   ADD CONSTRAINT `historica_consumibles_ibfk_1` FOREIGN KEY (`pedido_id_fk`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
@@ -528,7 +548,7 @@ ALTER TABLE `historica_consumibles`
   ADD CONSTRAINT `historica_consumibles_ibfk_4` FOREIGN KEY (`estado_fk`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `historica_herramientas`
+-- Filtros para la tabla `historica_herramientas`
 --
 ALTER TABLE `historica_herramientas`
   ADD CONSTRAINT `historica_herramientas_ibfk_1` FOREIGN KEY (`pedido_id_fk`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
@@ -537,34 +557,34 @@ ALTER TABLE `historica_herramientas`
   ADD CONSTRAINT `historica_herramientas_ibfk_4` FOREIGN KEY (`estado_fk`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `pedidos`
+-- Filtros para la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
   ADD CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`usuario_fk`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `pedidos_ibfk_2` FOREIGN KEY (`estado_fk`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `pedido_consumibles`
+-- Filtros para la tabla `pedido_consumibles`
 --
 ALTER TABLE `pedido_consumibles`
   ADD CONSTRAINT `pedido_consumibles_ibfk_1` FOREIGN KEY (`pedido_id_fk`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `pedido_consumibles_ibfk_2` FOREIGN KEY (`consumible_id_fk`) REFERENCES `consumibles` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `pedido_herramientas`
+-- Filtros para la tabla `pedido_herramientas`
 --
 ALTER TABLE `pedido_herramientas`
   ADD CONSTRAINT `pedido_herramientas_ibfk_1` FOREIGN KEY (`pedido_id_fk`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `pedido_herramientas_ibfk_2` FOREIGN KEY (`herramienta_id_fk`) REFERENCES `herramientas` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `subcategorias`
+-- Filtros para la tabla `subcategorias`
 --
 ALTER TABLE `subcategorias`
   ADD CONSTRAINT `subcategorias_ibfk_1` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tipos_herramienta`
+-- Filtros para la tabla `tipos_herramienta`
 --
 ALTER TABLE `tipos_herramienta`
   ADD CONSTRAINT `tipos_herramienta_ibfk_1` FOREIGN KEY (`subcategoria_id`) REFERENCES `subcategorias` (`id`) ON DELETE CASCADE;
