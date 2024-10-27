@@ -104,7 +104,7 @@ def get_herramientas_bajas():
 def get_categoria():
     id = request.args.get('id')
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT id, nombre FROM categorias WHERE categoria_id = %s", id)
+    cursor.execute("SELECT id, nombre FROM categorias WHERE categoria_id = %s", (id,))
     categoria = cursor.fetchall()
     cursor.close()
     
@@ -115,7 +115,7 @@ def get_categoria():
 def get_subcategoria():
     id = request.args.get('id')
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT sc.id, sc.nombre, sc.categoria_id, c.nombre as categoria_nombre FROM subcategorias sc INNER JOIN categorias c ON sc.categoria_id = c.id WHERE sc.id = %s", id)
+    cursor.execute("SELECT sc.id, sc.nombre, sc.categoria_id, c.nombre as categoria_nombre FROM subcategorias sc INNER JOIN categorias c ON sc.categoria_id = c.id WHERE sc.id = %s", (id,))
 
     subcategoria = cursor.fetchall()
     cursor.close()
@@ -127,7 +127,7 @@ def get_subcategoria():
 def get_consumible():
     id = request.args.get('id')
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT co.id, co.nombre, co.unidad, co.cantidad, co.imagen, co.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, c.nombre as categoria_nombre FROM consumibles co INNER JOIN subcategorias sc ON co.subcategoria_id = sc.id INNER JOIN categorias c ON sc.categoria_id = c.id WHERE co.id = %s", id)
+    cursor.execute("SELECT co.id, co.nombre, co.unidad, co.cantidad, co.imagen, co.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, c.nombre as categoria_nombre FROM consumibles co INNER JOIN subcategorias sc ON co.subcategoria_id = sc.id INNER JOIN categorias c ON sc.categoria_id = c.id WHERE co.id = %s", (id,))
 
     consumible = cursor.fetchall()
     cursor.close()
@@ -139,7 +139,7 @@ def get_consumible():
 def get_tipo_herramienta():
     id = request.args.get('id')
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT th.id, th.nombre, th.cantidad, th.disponibles, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, c.nombre as categoria_nombre FROM tipos_herramienta th INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias c ON sc.categoria_id = c.id WHERE co.id = %s", id)
+    cursor.execute("SELECT th.id, th.nombre, th.cantidad, th.disponibles, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, c.nombre as categoria_nombre FROM tipos_herramienta th INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias c ON sc.categoria_id = c.id WHERE co.id = %s", (id,))
 
     tipo = cursor.fetchall()
     cursor.close()
@@ -163,7 +163,7 @@ def get_herramienta():
 def get_herramienta_baja():
     id = request.args.get('id')
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM baja_herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id WHERE h.id = %s", id)
+    cursor.execute("SELECT h.id, h.imagen, h.observaciones, h.tipo_id, th.nombre as tipo_nombre, th.subcategoria_id, sc.nombre as subcategoria_nombre, sc.categoria_id, ca.nombre as categoria_nombre FROM baja_herramientas h INNER JOIN tipos_herramienta th ON h.tipo_id = th.id INNER JOIN subcategorias sc ON th.subcategoria_id = sc.id INNER JOIN categorias ca ON sc.categoria_id = ca.id WHERE h.id = %s", (id,))
 
     herramienta = cursor.fetchall()
     cursor.close()
@@ -504,7 +504,7 @@ def modificar_consumible():
 def eliminar_categoria():
     id = request.args.get('id')
     cursor = mysql.connection.cursor()
-    cursor.execute("DELETE FROM categorias WHERE id = %s", id)
+    cursor.execute("DELETE FROM categorias WHERE id = %s", (id,))
     
     mysql.connection.commit()
     cursor.close()
@@ -516,7 +516,7 @@ def eliminar_categoria():
 def eliminar_subcategoria():
     id = request.args.get('id')
     cursor = mysql.connection.cursor()
-    cursor.execute("DELETE FROM subcategorias WHERE id = %s", id)
+    cursor.execute("DELETE FROM subcategorias WHERE id = %s", (id,))
     
     mysql.connection.commit()
     cursor.close()
@@ -528,7 +528,7 @@ def eliminar_subcategoria():
 def eliminar_tipo():
     id = request.args.get('id')
     cursor = mysql.connection.cursor()
-    cursor.execute("DELETE FROM subcategorias WHERE id = %s", id)
+    cursor.execute("DELETE FROM subcategorias WHERE id = %s", (id,))
     
     mysql.connection.commit()
     cursor.close()
@@ -541,7 +541,7 @@ def eliminar_tipo():
 def eliminar_consumible():
     id = request.args.get('id')
     cursor = mysql.connection.cursor()
-    cursor.execute("DELETE FROM consumibles WHERE id = %s", id)
+    cursor.execute("DELETE FROM consumibles WHERE id = %s", (id,))
     
     mysql.connection.commit()
     cursor.close()
